@@ -1,0 +1,55 @@
+# Cloud Build pipeline: build image → push → deploy to Cloud Run
+# Trigger this manually or connect to GitHub in the GCP console.
+#
+# Required substitutions (set in Cloud Build trigger or pass with --substitutions):
+#   _REGION    — GCP region, e.g. asia-southeast1
+#   _PROJECT   — GCP project ID, e.g. my-project-123456
+#   _AR_REPO   — Artifact Registry repo name, e.g. mcp-servers
+#
+# Default substitutions below match the deployment target.
+
+substitutions:
+  _REGION: asia-southeast1
+  _PROJECT: "YOUR_PROJECT_NUMBER"
+  _AR_REPO: mcp-servers
+  _SERVICE: tiktok-ads-mcp
+
+steps:
+  # 1. Build the Docker image
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      - build
+      - "-t"
+      - "${_REGION}-docker.pkg.dev/${_PROJECT}/${_AR_REPO}/${_SERVICE}:${COMMIT_SHA}"
+      - "-t"
+      - "${_REGION}-docker.pkg.dev/${_PROJECT}/${_AR_REPO}/${_SERVICE}:latest"
+      - "."
+
+  # 2. Push both tags to Artifact Registry
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      - push
+      - "--all-tags"
+      - "${_REGION}-docker.pkg.dev/${_PROJECT}/${_AR_REPO}/${_SERVICE}"
+
+  # 3. Deploy to Cloud Run
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - "${_SERVICE}"
+      - "--image=${_REGION}-docker.pkg.dev/${_PROJECT}/${_AR_REPO}/${_SERVICE}:${COMMIT_SHA}"
+      - "--region=${_REGION}"
+      - "--platform=managed"
+      - "--allow-unauthenticated"
+      - "--port=8080"
+      - "--memory=512Mi"
+      - "--cpu=1"
+      - "--min-instances=0"
+      - "--max-instances=3"
+      - "--timeout=300"
+
+images:
+  - "${_REGION}-docker.pkg.dev/${_PROJECT}/${_AR_REPO}/${_SERVICE}:${COMMIT_SHA}"
+  - "${_REGION}-docker.pkg.dev/${_PROJECT}/${_AR_REPO}/${_SERVICE}:latest"
