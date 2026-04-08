@@ -14,6 +14,7 @@ Pattern mirrors linkedin-ads-mcp/src/server-sse.ts:
 
 import logging
 import os
+from importlib.metadata import version as pkg_version, PackageNotFoundError
 
 import uvicorn
 from starlette.middleware.cors import CORSMiddleware
@@ -37,10 +38,14 @@ PORT = int(os.getenv("PORT", "8080"))
 @app.custom_route("/health", methods=["GET"])
 async def health(request: Request) -> JSONResponse:
     """Public health check used by Cloud Run uptime monitoring."""
+    try:
+        _version = pkg_version("tiktok-ads-mcp")
+    except PackageNotFoundError:
+        _version = "dev"
     return JSONResponse({
         "status": "healthy",
         "service": "tiktok-ads-mcp",
-        "version": "0.1.3",
+        "version": _version,
         "transport": "streamable-http",
         "auth": "enabled" if os.getenv("MCP_API_KEY") else "disabled",
     })
