@@ -118,7 +118,7 @@ def test_health_returns_correct_shape():
     mock_request = MagicMock(spec=Request)
 
     with patch.dict(os.environ, {"MCP_API_KEY": "key123"}):
-        response = asyncio.get_event_loop().run_until_complete(health(mock_request))
+        response = asyncio.run(health(mock_request))
 
     body = json.loads(response.body)
     assert body["status"] == "healthy"
@@ -138,7 +138,7 @@ def test_health_auth_disabled_when_no_key():
 
     with patch.dict(os.environ, {}, clear=False):
         os.environ.pop("MCP_API_KEY", None)
-        response = asyncio.get_event_loop().run_until_complete(health(mock_request))
+        response = asyncio.run(health(mock_request))
 
     body = json.loads(response.body)
     assert body["auth"] == "disabled"
