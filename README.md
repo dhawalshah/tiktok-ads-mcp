@@ -94,6 +94,76 @@ Once configured, you can use the MCP tools through your MCP client (like Cursor,
 - **Generate reports** with custom dimensions, metrics, and time ranges
 - **Access real-time advertising data** and performance metrics
 
+## Cloud Run Deployment (Team / Self-Hosted)
+
+Deploy a shared instance for your team on Google Cloud Run.
+
+### Prerequisites
+
+- Google Cloud project with billing enabled
+- `gcloud` CLI authenticated (`gcloud auth login`)
+- Docker installed locally
+- Artifact Registry repository created:
+  ```bash
+  gcloud artifacts repositories create mcp-servers \
+    --repository-format=docker \
+    --location=asia-southeast1 \
+    --project=YOUR_PROJECT_ID
+  ```
+
+### Deploy
+
+```bash
+# Set your TikTok credentials
+export TIKTOK_APP_ID=your_app_id
+export TIKTOK_SECRET=your_app_secret
+export TIKTOK_ACCESS_TOKEN=your_access_token
+
+# Optional: protect the endpoint with a shared team key
+# export MCP_API_KEY=your_team_secret
+
+# Deploy (builds, pushes, and deploys in one step)
+gcloud config set project YOUR_PROJECT_ID
+./deploy.sh
+```
+
+After deployment, set your secrets permanently in Cloud Run:
+```bash
+gcloud run services update tiktok-ads-mcp \
+  --region=asia-southeast1 \
+  --update-env-vars="TIKTOK_APP_ID=...,TIKTOK_SECRET=...,TIKTOK_ACCESS_TOKEN=..."
+```
+
+### Connect Claude
+
+Add to your Claude Desktop `claude_desktop_config.json` or team connector:
+
+```json
+{
+  "mcpServers": {
+    "tiktok-ads": {
+      "url": "https://YOUR_SERVICE_URL/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_MCP_API_KEY"
+      }
+    }
+  }
+}
+```
+
+Omit the `headers` block if `MCP_API_KEY` is not set.
+
+### Health Check
+
+```bash
+curl https://YOUR_SERVICE_URL/health
+# {"status":"healthy","service":"tiktok-ads-mcp","transport":"streamable-http","auth":"enabled"}
+```
+
+### Automated Deployments (Cloud Build)
+
+Connect `cloudbuild.yaml` to a GitHub trigger in the GCP console to deploy automatically on push to `main`.
+
 ## API Coverage
 
 This MCP server provides **read-only** access to the TikTok Business API:
