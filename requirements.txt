@@ -7,3 +7,6 @@ mcp>=1.9.0
 
 # Data handling (lightweight)
 pandas>=2.2.0
+
+# HTTP server for Cloud Run deployment
+uvicorn>=0.30.0
