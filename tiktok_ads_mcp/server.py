@@ -340,6 +340,10 @@ async def create_async_report_tool(
     Dates are YYYY-MM-DD."""
     if not advertiser_id:
         raise ValueError("advertiser_id is required")
+    if not report_type:
+        raise ValueError("report_type is required")
+    if not data_level:
+        raise ValueError("data_level is required")
     if not dimensions:
         raise ValueError("dimensions is required")
     if not metrics:
