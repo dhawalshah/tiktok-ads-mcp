@@ -449,3 +449,58 @@ def test_get_pixels_respects_pagination():
     params = mock_client._make_request.call_args[0][2]
     assert params["page"] == 2
     assert params["page_size"] == 5
+
+
+# ---------------------------------------------------------------------------
+# Task 9: get_smart_plus_campaigns
+# ---------------------------------------------------------------------------
+
+def test_get_smart_plus_campaigns_returns_campaign_list():
+    mock_client = AsyncMock()
+    mock_client._make_request.return_value = {
+        "code": 0,
+        "data": {
+            "list": [
+                {
+                    "campaign_id": "SPC1",
+                    "campaign_name": "Smart+ Q1",
+                    "status": "ENABLE",
+                    "budget": "500.00",
+                    "budget_mode": "BUDGET_MODE_DAY",
+                    "objective_type": "CONVERSIONS",
+                    "create_time": "2024-01-01",
+                    "modify_time": "2024-02-01",
+                }
+            ]
+        },
+    }
+
+    from tiktok_ads_mcp.tools.get_smart_plus_campaigns import get_smart_plus_campaigns
+
+    result = asyncio.run(get_smart_plus_campaigns(mock_client, advertiser_id="111"))
+
+    assert len(result) == 1
+    assert result[0]["campaign_id"] == "SPC1"
+    assert result[0]["objective_type"] == "CONVERSIONS"
+    params = mock_client._make_request.call_args[0][2]
+    assert params["advertiser_id"] == "111"
+
+
+def test_get_smart_plus_campaigns_filters_by_ids():
+    mock_client = AsyncMock()
+    mock_client._make_request.return_value = {"code": 0, "data": {"list": []}}
+
+    from tiktok_ads_mcp.tools.get_smart_plus_campaigns import get_smart_plus_campaigns
+
+    asyncio.run(
+        get_smart_plus_campaigns(
+            mock_client,
+            advertiser_id="111",
+            campaign_ids=["SPC1", "SPC2"],
+            status="ENABLE",
+        )
+    )
+
+    params = mock_client._make_request.call_args[0][2]
+    assert params["campaign_ids"] == json.dumps(["SPC1", "SPC2"])
+    assert params["status"] == "ENABLE"

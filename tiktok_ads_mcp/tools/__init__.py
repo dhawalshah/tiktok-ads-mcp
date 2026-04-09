@@ -14,6 +14,7 @@ from .async_reports import create_async_report, check_async_report, download_asy
 from .get_audience_reach import get_audience_reach
 from .get_targeting_options import get_targeting_options
 from .get_pixels import get_pixels
+from .get_smart_plus_campaigns import get_smart_plus_campaigns
 
 __all__ = [
     "get_business_centers",
@@ -32,7 +33,5 @@ __all__ = [
     "get_audience_reach",
     "get_targeting_options",
     "get_pixels",
+    "get_smart_plus_campaigns",
 ]
-
-
-
