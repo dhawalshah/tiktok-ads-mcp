@@ -25,7 +25,8 @@ from .tools import (
     get_ads,
     get_reports,
     get_video_performance,
-    get_creative_fatigue
+    get_creative_fatigue,
+    get_ad_benchmark
 )
 
 # Setup logging
@@ -291,6 +292,29 @@ async def get_creative_fatigue_tool(
         {"success": True, "advertiser_id": advertiser_id, "count": len(items), "ads": items},
         indent=2,
     )
+
+@app.tool()
+@handle_errors
+async def get_ad_benchmark_tool(
+    advertiser_id: str,
+    industry_id: Optional[str] = None,
+    placement_type: Optional[str] = None,
+    objective_type: Optional[str] = None,
+) -> str:
+    """Get industry benchmark metrics (CTR, CVR, CPM, CPC) by vertical and placement.
+    Use to evaluate whether account performance is above or below industry average.
+    placement_type example: 'PLACEMENT_TIKTOK'. objective_type example: 'CONVERSIONS'."""
+    if not advertiser_id:
+        raise ValueError("advertiser_id is required")
+    client = get_tiktok_client()
+    benchmarks = await get_ad_benchmark(
+        client,
+        advertiser_id=advertiser_id,
+        industry_id=industry_id,
+        placement_type=placement_type,
+        objective_type=objective_type,
+    )
+    return json.dumps({"success": True, "benchmarks": benchmarks}, indent=2)
 
 
 def main():
