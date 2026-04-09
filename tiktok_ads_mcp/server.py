@@ -292,6 +292,7 @@ async def get_creative_fatigue_tool(
         indent=2,
     )
 
+
 def main():
     """Main function to run the MCP server"""
     logger.info("Starting TikTok Ads MCP Server...")

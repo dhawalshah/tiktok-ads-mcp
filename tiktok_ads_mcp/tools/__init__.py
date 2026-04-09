@@ -19,5 +19,5 @@ __all__ = [
     "get_ads",
     "get_reports",
     "get_video_performance",
-    "get_creative_fatigue"
-] 
+    "get_creative_fatigue",
+]
