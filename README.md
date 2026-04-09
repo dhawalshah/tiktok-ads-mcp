@@ -1,31 +1,41 @@
 # TikTok Ads MCP
 
-A comprehensive Model Context Protocol (MCP) server for interacting with the TikTok Business API. This package provides a complete interface to access TikTok advertising campaigns, ad groups, ads, and generate detailed performance reports.
+A comprehensive Model Context Protocol (MCP) server for interacting with the TikTok Business API. Query campaigns, video performance, audience targeting, benchmarks, and more directly from Claude or any MCP-compatible client.
 
 ## Features
 
 - **Read-Only TikTok Business API Integration**: Access all major TikTok advertising endpoints for data retrieval
-- **6 Comprehensive Tools**: Business centers, ad accounts, campaigns, ad groups, ads, and reports
+- **14 Tools**: Covers accounts, campaigns, Smart+ campaigns, ad groups, ads, reports, video performance, ad benchmarks, targeting options, pixels, creative fatigue, and async reports
 - **Advanced Filtering**: Powerful filtering options for all data retrieval operations
 - **Multi-Advertiser Support**: Handle multiple advertiser accounts in a single request
 - **Flexible Reporting**: Generate detailed performance reports with custom dimensions and metrics
-- **Real-time Data**: Access live advertising data and performance metrics
+- **Cloud Run Ready**: Deploy a shared team instance with a single script
 - **Error Handling**: Comprehensive error handling and validation
 - **Modular Architecture**: Clean, maintainable code structure
 - **Safe Operations**: All tools are read-only and will not modify your campaigns or ad data
 
 ## Available Tools
 
-1. **get_business_centers** - Retrieve business centers accessible by your access token
-2. **get_authorized_ad_accounts** - Get all authorized advertiser accounts
-3. **get_campaigns** - Retrieve campaigns with comprehensive filtering options
-4. **get_ad_groups** - Get ad groups with advanced filtering and targeting options
-5. **get_ads** - Retrieve ads with detailed creative and performance data
-6. **get_reports** - Generate comprehensive performance reports and analytics
+| Tool | Description | Status |
+|------|-------------|--------|
+| `get_authorized_ad_accounts_tool` | List all advertiser accounts under your access token | ✅ |
+| `get_advertiser_info_tool` | Account metadata: currency, timezone, industry, status | ✅ |
+| `get_business_centers_tool` | List accessible business centers | ✅ |
+| `get_campaigns_tool` | List standard campaigns with optional filters | ✅ |
+| `get_smart_plus_campaigns_tool` | List AI-optimised Smart+ campaigns (separate API) | ✅ |
+| `get_ad_groups_tool` | List ad groups under a campaign or advertiser | ✅ |
+| `get_ads_tool` | List individual ads with detailed creative data | ✅ |
+| `get_reports_tool` | Performance reports with custom dimensions, metrics, and date ranges | ✅ |
+| `get_video_performance_tool` | TikTok-specific video metrics: 2s/6s views, completion rate, watch time | ✅ |
+| `get_ad_benchmark_tool` | Compare ad CTR/CVR/CPM/CPC against industry benchmarks | ✅ |
+| `get_targeting_options_tool` | Browse interest categories available for audience targeting | ✅ |
+| `get_pixels_tool` | List TikTok Pixel installations and tracked conversion events | ✅ |
+| `get_creative_fatigue_tool` | Creative fatigue scores and refresh recommendations | ⚠️ Requires TikTok partner access |
+| `create/check/download_async_report_tool` | Async report pipeline for large datasets | ⚠️ Requires TikTok partner access |
 
 ## Prerequisites
 
-- Python 3.14.0 or higher
+- Python 3.10 or higher
 - TikTok Business API access
 - Valid API credentials (app ID, secret, access token)
 
@@ -40,7 +50,7 @@ A comprehensive Model Context Protocol (MCP) server for interacting with the Tik
 
 2. **Alternatively, if you're familiar with Git:**
    ```bash
-   git clone https://github.com/ysntony/tiktok-ads-mcp.git
+   git clone https://github.com/dhawalshah/tiktok-ads-mcp.git
    ```
 
 3. **Install Dependencies**
@@ -258,7 +268,12 @@ For issues and questions:
 
 ## Changelog
 
-### v0.1.3 (Current)
+### v0.2.0 (Current)
+- **14 Tools**: Added `get_video_performance`, `get_ad_benchmark`, `get_targeting_options`, `get_smart_plus_campaigns`, `get_pixels`, `get_advertiser_info`, `get_creative_fatigue`, and async report pipeline
+- **Cloud Run Deployment**: Streamable HTTP transport via `server_http.py`; `deploy.sh` one-shot deploy script
+- **Real API Validation**: All tools smoke-tested against live TikTok Business API
+
+### v0.1.3
 - **Async Support**: Complete refactor to use `async/await` with `httpx` for improved performance
 - **Retry Logic**: Added automatic retries for rate limits and server errors using `tenacity`
 - **Error Handling**: Simplified and standardized error handling with decorators
@@ -266,22 +281,14 @@ For issues and questions:
 
 ### v0.1.2
 - **FastMCP Implementation**: Modern MCP server using official FastMCP framework
-- **70% Code Reduction**: Compared to traditional MCP implementations
 - **Automatic Schema Generation**: From Python type hints
 - **Simplified Tool Registration**: Using `@app.tool()` decorators
-- **Enhanced Error Handling**: Built-in error handling with consistent responses
-- **Type Safety**: Full parameter validation from type hints
-- **Future-Proof**: Part of the official MCP SDK
 
 ### v0.1.1
-- Complete implementation of all 6 tools
-- Advanced filtering and reporting capabilities
-- Multi-advertiser support
-- Comprehensive error handling
+- Complete implementation of original 6 tools
+- Multi-advertiser support and advanced filtering
 - Modular tools architecture
-- Complete documentation and usage guides
 
 ### v0.1.0
 - Initial release with basic MCP server structure
 - Core API client implementation
-- Basic authentication and configuration
