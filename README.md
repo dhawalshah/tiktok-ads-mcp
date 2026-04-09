@@ -37,6 +37,36 @@ A comprehensive Model Context Protocol (MCP) server for interacting with the Tik
 
 > ¹ Requires TikTok partner programme access.
 
+## Example Prompts
+
+Once connected, just ask Claude naturally:
+
+**Account overview**
+- "List all my TikTok advertiser accounts"
+- "What's the currency and timezone for advertiser 123456?"
+
+**Campaigns & ads**
+- "Show all active campaigns for advertiser 123456"
+- "List the ad groups in campaign 789 and their budgets"
+- "What ads are currently running under ad group 456?"
+- "Show me all Smart+ campaigns and their status"
+
+**Performance & reporting**
+- "Show spend, impressions, and CTR by campaign for the last 30 days"
+- "Which campaigns had the highest CPM last week?"
+- "Break down performance by day for advertiser 123456 over the past 2 weeks"
+- "Compare this month's spend to last month across all campaigns"
+
+**Video performance**
+- "Get video completion rates for campaign 789 this month"
+- "Which ads have the highest 6-second view rate?"
+- "Show average watch time for all ads in the last 14 days"
+
+**Benchmarks & targeting**
+- "How does ad 111 CTR compare to industry benchmarks?"
+- "What interest categories are available for targeting a fitness audience?"
+- "Show benchmark CPM for ads 111 and 222 broken down by placement"
+
 ## Prerequisites
 
 - Python 3.10 or higher
