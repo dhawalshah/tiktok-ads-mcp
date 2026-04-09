@@ -30,6 +30,7 @@ from .tools import (
     create_async_report,
     check_async_report,
     download_async_report,
+    get_audience_reach,
 )
 
 # Setup logging
@@ -398,6 +399,40 @@ async def download_async_report_tool(advertiser_id: str, task_id: str) -> str:
         result["count"] = count
     result["rows"] = rows
     return json.dumps(result, indent=2)
+
+
+@app.tool()
+@handle_errors
+async def get_audience_reach_tool(
+    advertiser_id: str,
+    objective_type: str,
+    placements: Optional[List[str]] = None,
+    age: Optional[List[str]] = None,
+    gender: Optional[str] = None,
+    location_ids: Optional[List[str]] = None,
+    interest_category_ids: Optional[List[str]] = None,
+) -> str:
+    """Get estimated audience reach for given targeting criteria.
+    Useful for planning campaigns and understanding audience size before launch.
+    objective_type examples: 'TRAFFIC', 'CONVERSIONS', 'APP_INSTALL'.
+    gender: 'GENDER_MALE' | 'GENDER_FEMALE' | 'GENDER_UNLIMITED'.
+    Returns estimated_audience_size_lower, estimated_audience_size_upper, reach_trend."""
+    if not advertiser_id:
+        raise ValueError("advertiser_id is required")
+    if not objective_type:
+        raise ValueError("objective_type is required")
+    client = get_tiktok_client()
+    result = await get_audience_reach(
+        client,
+        advertiser_id=advertiser_id,
+        objective_type=objective_type,
+        placements=placements,
+        age=age,
+        gender=gender,
+        location_ids=location_ids,
+        interest_category_ids=interest_category_ids,
+    )
+    return json.dumps({"success": True, **result}, indent=2)
 
 
 def main():
