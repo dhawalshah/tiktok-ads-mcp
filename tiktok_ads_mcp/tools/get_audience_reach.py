@@ -21,15 +21,15 @@ async def get_audience_reach(
         "advertiser_id": advertiser_id,
         "objective_type": objective_type,
     }
-    if placements:
+    if placements is not None:
         data["placements"] = placements
-    if age:
+    if age is not None:
         data["age"] = age
-    if gender:
+    if gender is not None:
         data["gender"] = gender
-    if location_ids:
+    if location_ids is not None:
         data["location_ids"] = location_ids
-    if interest_category_ids:
+    if interest_category_ids is not None:
         data["interest_category_ids"] = interest_category_ids
 
     try:
