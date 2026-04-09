@@ -24,7 +24,8 @@ from .tools import (
     get_ad_groups,
     get_ads,
     get_reports,
-    get_video_performance
+    get_video_performance,
+    get_creative_fatigue
 )
 
 # Setup logging
@@ -266,6 +267,28 @@ async def get_video_performance_tool(
             "count": len(result["list"]),
             "rows": result["list"],
         },
+        indent=2,
+    )
+
+@app.tool()
+@handle_errors
+async def get_creative_fatigue_tool(
+    advertiser_id: str,
+    ad_ids: Optional[List[str]] = None,
+    page: int = 1,
+    page_size: int = 20,
+) -> str:
+    """Get creative fatigue scores per ad. Indicates when an ad has been shown too frequently
+    to the same audience and needs refreshing. Returns fatigue_status, fatigue_level, and
+    recommendations per ad. Optionally filter by ad_ids."""
+    if not advertiser_id:
+        raise ValueError("advertiser_id is required")
+    client = get_tiktok_client()
+    items = await get_creative_fatigue(
+        client, advertiser_id=advertiser_id, ad_ids=ad_ids, page=page, page_size=page_size
+    )
+    return json.dumps(
+        {"success": True, "advertiser_id": advertiser_id, "count": len(items), "ads": items},
         indent=2,
     )
 

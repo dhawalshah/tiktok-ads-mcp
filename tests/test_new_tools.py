@@ -104,3 +104,46 @@ def test_get_video_performance_dimensions_json_encoded():
 
     params = mock_client._make_request.call_args[0][2]
     assert params["dimensions"] == json.dumps(["ad_id", "stat_time_day"])
+
+
+# ---------------------------------------------------------------------------
+# Task 3: get_creative_fatigue
+# ---------------------------------------------------------------------------
+
+def test_get_creative_fatigue_returns_fatigue_list():
+    mock_client = AsyncMock()
+    mock_client._make_request.return_value = {
+        "code": 0,
+        "data": {
+            "list": [
+                {
+                    "ad_id": "AD1",
+                    "ad_name": "Summer Sale",
+                    "fatigue_status": "HIGH",
+                    "fatigue_level": 85,
+                    "recommendation": "Refresh creative",
+                }
+            ]
+        },
+    }
+
+    from tiktok_ads_mcp.tools.get_creative_fatigue import get_creative_fatigue
+
+    result = asyncio.run(get_creative_fatigue(mock_client, advertiser_id="111"))
+
+    assert len(result) == 1
+    assert result[0]["ad_id"] == "AD1"
+    assert result[0]["fatigue_status"] == "HIGH"
+    assert result[0]["recommendation"] == "Refresh creative"
+
+
+def test_get_creative_fatigue_passes_ad_ids():
+    mock_client = AsyncMock()
+    mock_client._make_request.return_value = {"code": 0, "data": {"list": []}}
+
+    from tiktok_ads_mcp.tools.get_creative_fatigue import get_creative_fatigue
+
+    asyncio.run(get_creative_fatigue(mock_client, advertiser_id="111", ad_ids=["AD1", "AD2"]))
+
+    params = mock_client._make_request.call_args[0][2]
+    assert params["ad_ids"] == json.dumps(["AD1", "AD2"])
