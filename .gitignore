@@ -70,3 +70,9 @@ test_mcp_server.py
 test_config.py
 DEV_SETUP.md
 .env.development
+
+# One-off helper scripts (may contain hardcoded credentials)
+catch_auth.py
+get_token.py
+probe_apis.py
+smoke_test.pydocs/
