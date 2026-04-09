@@ -26,7 +26,10 @@ from .tools import (
     get_reports,
     get_video_performance,
     get_creative_fatigue,
-    get_ad_benchmark
+    get_ad_benchmark,
+    create_async_report,
+    check_async_report,
+    download_async_report,
 )
 
 # Setup logging
@@ -315,6 +318,82 @@ async def get_ad_benchmark_tool(
         objective_type=objective_type,
     )
     return json.dumps({"success": True, "benchmarks": benchmarks}, indent=2)
+
+
+@app.tool()
+@handle_errors
+async def create_async_report_tool(
+    advertiser_id: str,
+    report_type: str,
+    data_level: str,
+    dimensions: List[str],
+    metrics: List[str],
+    start_date: str,
+    end_date: str,
+) -> str:
+    """Creates an async report task for large datasets or long date ranges.
+    After calling this tool, **immediately use check_async_report_tool with the returned
+    task_id to monitor progress. When status is COMPLETE, use download_async_report_tool
+    to retrieve the data.** Inform the user that the report is being generated and you
+    will check on it.
+    report_type: BASIC | AUDIENCE. data_level: AUCTION_AD | AUCTION_ADGROUP | AUCTION_CAMPAIGN.
+    Dates are YYYY-MM-DD."""
+    if not advertiser_id:
+        raise ValueError("advertiser_id is required")
+    if not dimensions:
+        raise ValueError("dimensions is required")
+    if not metrics:
+        raise ValueError("metrics is required")
+    if not start_date or not end_date:
+        raise ValueError("start_date and end_date are required")
+    client = get_tiktok_client()
+    result = await create_async_report(
+        client,
+        advertiser_id=advertiser_id,
+        report_type=report_type,
+        data_level=data_level,
+        dimensions=dimensions,
+        metrics=metrics,
+        start_date=start_date,
+        end_date=end_date,
+    )
+    return json.dumps({"success": True, **result}, indent=2)
+
+
+@app.tool()
+@handle_errors
+async def check_async_report_tool(advertiser_id: str, task_id: str) -> str:
+    """Checks the status of an async report task created by create_async_report_tool.
+    Status will be PROCESSING, COMPLETE, or FAILED.
+    **If PROCESSING, inform the user the report is still generating and check again shortly.
+    When COMPLETE, call download_async_report_tool with the same task_id.**"""
+    if not advertiser_id:
+        raise ValueError("advertiser_id is required")
+    if not task_id:
+        raise ValueError("task_id is required")
+    client = get_tiktok_client()
+    result = await check_async_report(client, advertiser_id=advertiser_id, task_id=task_id)
+    return json.dumps({"success": True, **result}, indent=2)
+
+
+@app.tool()
+@handle_errors
+async def download_async_report_tool(advertiser_id: str, task_id: str) -> str:
+    """Downloads the completed data for an async report task.
+    **Only call after check_async_report_tool returns status COMPLETE.**
+    Returns the report rows."""
+    if not advertiser_id:
+        raise ValueError("advertiser_id is required")
+    if not task_id:
+        raise ValueError("task_id is required")
+    client = get_tiktok_client()
+    rows = await download_async_report(client, advertiser_id=advertiser_id, task_id=task_id)
+    count = len(rows) if isinstance(rows, list) else None
+    result: Dict[str, Any] = {"success": True, "task_id": task_id}
+    if count is not None:
+        result["count"] = count
+    result["rows"] = rows
+    return json.dumps(result, indent=2)
 
 
 def main():
