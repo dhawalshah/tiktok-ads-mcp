@@ -10,6 +10,7 @@ from .reports import get_reports
 from .get_video_performance import get_video_performance
 from .get_creative_fatigue import get_creative_fatigue
 from .get_ad_benchmark import get_ad_benchmark
+from .async_reports import create_async_report, check_async_report, download_async_report
 
 __all__ = [
     "get_business_centers",
@@ -22,5 +23,8 @@ __all__ = [
     "get_video_performance",
     "get_creative_fatigue",
     "get_ad_benchmark",
+    "create_async_report",
+    "check_async_report",
+    "download_async_report",
 ]
 

@@ -195,3 +195,102 @@ def test_get_ad_benchmark_passes_optional_filters():
     assert params["industry_id"] == "IND_001"
     assert params["placement_type"] == "PLACEMENT_TIKTOK"
     assert params["objective_type"] == "CONVERSIONS"
+
+
+# ---------------------------------------------------------------------------
+# Task 5: async_reports (create / check / download)
+# ---------------------------------------------------------------------------
+
+def test_create_async_report_returns_task_id():
+    mock_client = AsyncMock()
+    mock_client._make_request.return_value = {
+        "code": 0,
+        "data": {"task_id": "TASK_001"},
+    }
+
+    from tiktok_ads_mcp.tools.async_reports import create_async_report
+
+    result = asyncio.run(
+        create_async_report(
+            mock_client,
+            advertiser_id="111",
+            report_type="BASIC",
+            data_level="AUCTION_AD",
+            dimensions=["ad_id", "stat_time_day"],
+            metrics=["spend", "impressions"],
+            start_date="2024-01-01",
+            end_date="2024-01-31",
+        )
+    )
+
+    assert result["task_id"] == "TASK_001"
+    assert result["status"] == "PROCESSING"
+    # Verify it used POST with data body
+    call_args = mock_client._make_request.call_args
+    assert call_args[0][0] == "POST"
+    assert call_args[0][1] == "/report/task/create/"
+    body = call_args[1]["data"]
+    assert body["advertiser_id"] == "111"
+    assert body["metrics"] == ["spend", "impressions"]
+
+
+def test_check_async_report_returns_status():
+    mock_client = AsyncMock()
+    mock_client._make_request.return_value = {
+        "code": 0,
+        "data": {"task_id": "TASK_001", "status": "COMPLETE", "progress_rate": 100},
+    }
+
+    from tiktok_ads_mcp.tools.async_reports import check_async_report
+
+    result = asyncio.run(check_async_report(mock_client, advertiser_id="111", task_id="TASK_001"))
+
+    assert result["task_id"] == "TASK_001"
+    assert result["status"] == "COMPLETE"
+    assert result["progress_rate"] == 100
+    call_args = mock_client._make_request.call_args[0]
+    assert call_args[0] == "GET"
+    assert call_args[2]["task_id"] == "TASK_001"
+
+
+def test_download_async_report_inline_rows():
+    """When API returns rows directly (no URL), return them."""
+    mock_client = AsyncMock()
+    mock_client._make_request.return_value = {
+        "code": 0,
+        "data": {"list": [{"dimensions": {}, "metrics": {"spend": "100"}}]},
+    }
+
+    from tiktok_ads_mcp.tools.async_reports import download_async_report
+
+    result = asyncio.run(download_async_report(mock_client, advertiser_id="111", task_id="TASK_001"))
+
+    assert result == [{"dimensions": {}, "metrics": {"spend": "100"}}]
+
+
+def test_download_async_report_follows_download_url():
+    """When API returns a download_url, fetch it and return JSON rows."""
+    mock_client = AsyncMock()
+    mock_client._make_request.return_value = {
+        "code": 0,
+        "data": {"download_url": "https://example.com/report.json"},
+    }
+
+    mock_http_response = MagicMock()
+    mock_http_response.raise_for_status = MagicMock()
+    mock_http_response.json.return_value = [{"row": 1}]
+    mock_http_response.text = '[{"row": 1}]'
+
+    mock_http_client = AsyncMock()
+    mock_http_client.get.return_value = mock_http_response
+
+    with patch("tiktok_ads_mcp.tools.async_reports.httpx.AsyncClient") as MockClass:
+        MockClass.return_value.__aenter__ = AsyncMock(return_value=mock_http_client)
+        MockClass.return_value.__aexit__ = AsyncMock(return_value=None)
+
+        from tiktok_ads_mcp.tools.async_reports import download_async_report
+
+        result = asyncio.run(download_async_report(mock_client, advertiser_id="111", task_id="TASK_001"))
+
+    assert result == [{"row": 1}]
+    mock_http_client.get.assert_called_once_with("https://example.com/report.json")
