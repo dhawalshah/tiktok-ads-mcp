@@ -147,3 +147,51 @@ def test_get_creative_fatigue_passes_ad_ids():
 
     params = mock_client._make_request.call_args[0][2]
     assert params["ad_ids"] == json.dumps(["AD1", "AD2"])
+
+
+# ---------------------------------------------------------------------------
+# Task 4: get_ad_benchmark
+# ---------------------------------------------------------------------------
+
+def test_get_ad_benchmark_returns_benchmark_dict():
+    mock_client = AsyncMock()
+    mock_client._make_request.return_value = {
+        "code": 0,
+        "data": {
+            "industry": "ECOMMERCE",
+            "placement": "PLACEMENT_TIKTOK",
+            "ctr": "1.5",
+            "cpm": "8.0",
+            "cpc": "0.53",
+            "cvr": "2.1",
+        },
+    }
+
+    from tiktok_ads_mcp.tools.get_ad_benchmark import get_ad_benchmark
+
+    result = asyncio.run(get_ad_benchmark(mock_client, advertiser_id="111"))
+
+    assert result["ctr"] == "1.5"
+    assert result["industry"] == "ECOMMERCE"
+
+
+def test_get_ad_benchmark_passes_optional_filters():
+    mock_client = AsyncMock()
+    mock_client._make_request.return_value = {"code": 0, "data": {}}
+
+    from tiktok_ads_mcp.tools.get_ad_benchmark import get_ad_benchmark
+
+    asyncio.run(
+        get_ad_benchmark(
+            mock_client,
+            advertiser_id="111",
+            industry_id="IND_001",
+            placement_type="PLACEMENT_TIKTOK",
+            objective_type="CONVERSIONS",
+        )
+    )
+
+    params = mock_client._make_request.call_args[0][2]
+    assert params["industry_id"] == "IND_001"
+    assert params["placement_type"] == "PLACEMENT_TIKTOK"
+    assert params["objective_type"] == "CONVERSIONS"
