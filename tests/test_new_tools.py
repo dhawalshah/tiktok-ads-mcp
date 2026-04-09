@@ -401,3 +401,51 @@ def test_get_targeting_options_passes_optional_filters():
     params = mock_client._make_request.call_args[0][2]
     assert params["targeting_type"] == "INTEREST"
     assert params["objective_type"] == "TRAFFIC"
+
+
+# ---------------------------------------------------------------------------
+# Task 8: get_pixels
+# ---------------------------------------------------------------------------
+
+def test_get_pixels_returns_pixel_list():
+    mock_client = AsyncMock()
+    mock_client._make_request.return_value = {
+        "code": 0,
+        "data": {
+            "list": [
+                {
+                    "pixel_id": "PX1",
+                    "pixel_name": "Main Site",
+                    "pixel_code": "ABCDEF",
+                    "status": "NORMAL",
+                    "create_time": "2023-01-01",
+                    "events": ["Purchase", "ViewContent"],
+                }
+            ]
+        },
+    }
+
+    from tiktok_ads_mcp.tools.get_pixels import get_pixels
+
+    result = asyncio.run(get_pixels(mock_client, advertiser_id="111"))
+
+    assert len(result) == 1
+    assert result[0]["pixel_id"] == "PX1"
+    assert result[0]["events"] == ["Purchase", "ViewContent"]
+    params = mock_client._make_request.call_args[0][2]
+    assert params["advertiser_id"] == "111"
+    assert params["page"] == 1
+    assert params["page_size"] == 20
+
+
+def test_get_pixels_respects_pagination():
+    mock_client = AsyncMock()
+    mock_client._make_request.return_value = {"code": 0, "data": {"list": []}}
+
+    from tiktok_ads_mcp.tools.get_pixels import get_pixels
+
+    asyncio.run(get_pixels(mock_client, advertiser_id="111", page=2, page_size=5))
+
+    params = mock_client._make_request.call_args[0][2]
+    assert params["page"] == 2
+    assert params["page_size"] == 5
