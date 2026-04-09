@@ -33,6 +33,7 @@ from .tools import (
     get_audience_reach,
     get_targeting_options,
     get_pixels,
+    get_smart_plus_campaigns,
 )
 
 # Setup logging
@@ -482,6 +483,41 @@ async def get_pixels_tool(
     pixels = await get_pixels(client, advertiser_id=advertiser_id, page=page, page_size=page_size)
     return json.dumps(
         {"success": True, "advertiser_id": advertiser_id, "count": len(pixels), "pixels": pixels},
+        indent=2,
+    )
+
+
+@app.tool()
+@handle_errors
+async def get_smart_plus_campaigns_tool(
+    advertiser_id: str,
+    campaign_ids: Optional[List[str]] = None,
+    status: Optional[str] = None,
+    page: int = 1,
+    page_size: int = 10,
+) -> str:
+    """Get Smart+ (AI-optimised) campaigns for an advertiser.
+    Smart+ campaigns do NOT appear in get_campaigns_tool — accounts using Smart+ have a blind spot
+    without this tool. Returns campaign_id, name, status, budget, objective_type, create/modify times.
+    status filter examples: 'ENABLE', 'DISABLE', 'DELETE'."""
+    if not advertiser_id:
+        raise ValueError("advertiser_id is required")
+    client = get_tiktok_client()
+    campaigns = await get_smart_plus_campaigns(
+        client,
+        advertiser_id=advertiser_id,
+        campaign_ids=campaign_ids,
+        status=status,
+        page=page,
+        page_size=page_size,
+    )
+    return json.dumps(
+        {
+            "success": True,
+            "advertiser_id": advertiser_id,
+            "count": len(campaigns),
+            "campaigns": campaigns,
+        },
         indent=2,
     )
 
