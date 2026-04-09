@@ -32,6 +32,7 @@ from .tools import (
     download_async_report,
     get_audience_reach,
     get_targeting_options,
+    get_pixels,
 )
 
 # Setup logging
@@ -461,6 +462,26 @@ async def get_targeting_options_tool(
     )
     return json.dumps(
         {"success": True, "query": query, "count": len(options), "options": options},
+        indent=2,
+    )
+
+
+@app.tool()
+@handle_errors
+async def get_pixels_tool(
+    advertiser_id: str,
+    page: int = 1,
+    page_size: int = 20,
+) -> str:
+    """List all TikTok Pixel installations for an advertiser. Shows which conversion events
+    are being tracked and whether measurement is set up correctly.
+    Returns pixel_id, pixel_name, pixel_code, status, create_time, and tracked events."""
+    if not advertiser_id:
+        raise ValueError("advertiser_id is required")
+    client = get_tiktok_client()
+    pixels = await get_pixels(client, advertiser_id=advertiser_id, page=page, page_size=page_size)
+    return json.dumps(
+        {"success": True, "advertiser_id": advertiser_id, "count": len(pixels), "pixels": pixels},
         indent=2,
     )
 

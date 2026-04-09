@@ -13,6 +13,7 @@ from .get_ad_benchmark import get_ad_benchmark
 from .async_reports import create_async_report, check_async_report, download_async_report
 from .get_audience_reach import get_audience_reach
 from .get_targeting_options import get_targeting_options
+from .get_pixels import get_pixels
 
 __all__ = [
     "get_business_centers",
@@ -30,6 +31,8 @@ __all__ = [
     "download_async_report",
     "get_audience_reach",
     "get_targeting_options",
+    "get_pixels",
 ]
+
 
 
