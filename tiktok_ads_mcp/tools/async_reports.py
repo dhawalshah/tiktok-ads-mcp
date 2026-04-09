@@ -5,6 +5,8 @@ from typing import Any, Dict, List
 
 import httpx
 
+from ..config import config
+
 logger = logging.getLogger(__name__)
 
 
@@ -72,7 +74,7 @@ async def download_async_report(
         # API may return a URL instead of inline data
         download_url = data.get("download_url") or data.get("url")
         if download_url:
-            async with httpx.AsyncClient(timeout=60) as http_client:
+            async with httpx.AsyncClient(timeout=config.REQUEST_TIMEOUT) as http_client:
                 url_resp = await http_client.get(download_url)
                 url_resp.raise_for_status()
                 try:

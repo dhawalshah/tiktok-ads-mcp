@@ -8,7 +8,7 @@ This provides a clean, efficient interface to the TikTok Ads API with automatic 
 import json
 import logging
 import functools
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 # MCP imports
 from mcp.server import FastMCP
@@ -271,9 +271,9 @@ async def get_video_performance_tool(
         {
             "success": True,
             "advertiser_id": advertiser_id,
-            "page_info": result["page_info"],
-            "count": len(result["list"]),
-            "rows": result["list"],
+            "page_info": result.get("page_info", {}),
+            "count": len(result.get("list", [])),
+            "rows": result.get("list", []),
         },
         indent=2,
     )
