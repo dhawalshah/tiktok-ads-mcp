@@ -12,6 +12,7 @@ from typing import Any, Dict, List, Optional
 
 # MCP imports
 from mcp.server import FastMCP
+from mcp.server.transport_security import TransportSecuritySettings
 
 # TikTok client
 from .client import TikTokAdsClient
@@ -44,7 +45,12 @@ logger = logging.getLogger(__name__)
 tiktok_client: Optional[TikTokAdsClient] = None
 
 # Create MCP server instance
-app = FastMCP("tiktok-ads")
+# Disable DNS rebinding protection — server runs behind HTTPS on Cloud Run,
+# auth is handled by ApiKeyMiddleware in server_http.py.
+app = FastMCP(
+    "tiktok-ads",
+    transport_security=TransportSecuritySettings(enable_dns_rebinding_protection=False),
+)
 
 def get_tiktok_client() -> TikTokAdsClient:
     """Get or create TikTok API client instance"""
