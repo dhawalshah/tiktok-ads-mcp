@@ -294,3 +294,55 @@ def test_download_async_report_follows_download_url():
 
     assert result == [{"row": 1}]
     mock_http_client.get.assert_called_once_with("https://example.com/report.json")
+
+
+# ---------------------------------------------------------------------------
+# Task 6: get_audience_reach
+# ---------------------------------------------------------------------------
+
+def test_get_audience_reach_returns_size_estimate():
+    mock_client = AsyncMock()
+    mock_client._make_request.return_value = {
+        "code": 0,
+        "data": {
+            "lower": 500000,
+            "upper": 1200000,
+            "reach_trend": [{"date": "2024-01-01", "reach": 600000}],
+        },
+    }
+
+    from tiktok_ads_mcp.tools.get_audience_reach import get_audience_reach
+
+    result = asyncio.run(
+        get_audience_reach(
+            mock_client,
+            advertiser_id="111",
+            objective_type="TRAFFIC",
+            location_ids=["US"],
+        )
+    )
+
+    assert result["estimated_audience_size_lower"] == 500000
+    assert result["estimated_audience_size_upper"] == 1200000
+    assert "reach_trend" in result
+    # Verify POST with body containing advertiser_id and objective_type
+    call_args = mock_client._make_request.call_args
+    assert call_args[0][0] == "POST"
+    body = call_args[1]["data"]
+    assert body["advertiser_id"] == "111"
+    assert body["objective_type"] == "TRAFFIC"
+    assert body["location_ids"] == ["US"]
+
+
+def test_get_audience_reach_omits_none_targeting():
+    mock_client = AsyncMock()
+    mock_client._make_request.return_value = {"code": 0, "data": {}}
+
+    from tiktok_ads_mcp.tools.get_audience_reach import get_audience_reach
+
+    asyncio.run(get_audience_reach(mock_client, advertiser_id="111", objective_type="TRAFFIC"))
+
+    body = mock_client._make_request.call_args[1]["data"]
+    assert "age" not in body
+    assert "gender" not in body
+    assert "placements" not in body
