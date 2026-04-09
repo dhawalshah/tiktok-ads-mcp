@@ -19,6 +19,7 @@ from .config import config
 from .tools import (
     get_business_centers,
     get_authorized_ad_accounts,
+    get_advertiser_info,
     get_campaigns,
     get_ad_groups,
     get_ads,
@@ -85,12 +86,27 @@ async def get_authorized_ad_accounts_tool(random_string: str = "") -> str:
     """Get all authorized ad accounts accessible by the current access token"""
     client = get_tiktok_client()
     advertisers = await get_authorized_ad_accounts(client)
-    
+
     return json.dumps({
         "success": True,
         "count": len(advertisers),
         "advertisers": advertisers
     }, indent=2)
+
+@app.tool()
+@handle_errors
+async def get_advertiser_info_tool(advertiser_ids: List[str]) -> str:
+    """Get account-level metadata (currency, timezone, industry, status) for one or more advertisers.
+    This is foundational context for interpreting all other data — especially date breakdowns,
+    which depend on the account timezone."""
+    if not advertiser_ids:
+        raise ValueError("advertiser_ids is required")
+    client = get_tiktok_client()
+    advertisers = await get_advertiser_info(client, advertiser_ids=advertiser_ids)
+    return json.dumps(
+        {"success": True, "count": len(advertisers), "advertisers": advertisers},
+        indent=2,
+    )
 
 @app.tool()
 @handle_errors
