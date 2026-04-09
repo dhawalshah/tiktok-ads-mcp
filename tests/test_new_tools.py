@@ -346,3 +346,58 @@ def test_get_audience_reach_omits_none_targeting():
     assert "age" not in body
     assert "gender" not in body
     assert "placements" not in body
+
+
+# ---------------------------------------------------------------------------
+# Task 7: get_targeting_options
+# ---------------------------------------------------------------------------
+
+def test_get_targeting_options_returns_options_list():
+    mock_client = AsyncMock()
+    mock_client._make_request.return_value = {
+        "code": 0,
+        "data": {
+            "list": [
+                {
+                    "id": "INT_001",
+                    "name": "Fitness & Wellness",
+                    "type": "INTEREST",
+                    "audience_size": 5000000,
+                }
+            ]
+        },
+    }
+
+    from tiktok_ads_mcp.tools.get_targeting_options import get_targeting_options
+
+    result = asyncio.run(
+        get_targeting_options(mock_client, advertiser_id="111", query="fitness")
+    )
+
+    assert len(result) == 1
+    assert result[0]["id"] == "INT_001"
+    assert result[0]["type"] == "INTEREST"
+    params = mock_client._make_request.call_args[0][2]
+    assert params["query"] == "fitness"
+    assert params["advertiser_id"] == "111"
+
+
+def test_get_targeting_options_passes_optional_filters():
+    mock_client = AsyncMock()
+    mock_client._make_request.return_value = {"code": 0, "data": {"list": []}}
+
+    from tiktok_ads_mcp.tools.get_targeting_options import get_targeting_options
+
+    asyncio.run(
+        get_targeting_options(
+            mock_client,
+            advertiser_id="111",
+            query="sports",
+            targeting_type="INTEREST",
+            objective_type="TRAFFIC",
+        )
+    )
+
+    params = mock_client._make_request.call_args[0][2]
+    assert params["targeting_type"] == "INTEREST"
+    assert params["objective_type"] == "TRAFFIC"

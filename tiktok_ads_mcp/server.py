@@ -31,6 +31,7 @@ from .tools import (
     check_async_report,
     download_async_report,
     get_audience_reach,
+    get_targeting_options,
 )
 
 # Setup logging
@@ -433,6 +434,35 @@ async def get_audience_reach_tool(
         interest_category_ids=interest_category_ids,
     )
     return json.dumps({"success": True, **result}, indent=2)
+
+
+@app.tool()
+@handle_errors
+async def get_targeting_options_tool(
+    advertiser_id: str,
+    query: str,
+    objective_type: Optional[str] = None,
+    targeting_type: Optional[str] = None,
+) -> str:
+    """Search available targeting options (interests, behaviors, demographics) by keyword.
+    Use to answer questions like 'what TikTok interest categories exist for fitness brands?'
+    targeting_type: 'INTEREST' | 'BEHAVIOR' | 'HASHTAG'. Returns id, name, type, audience_size."""
+    if not advertiser_id:
+        raise ValueError("advertiser_id is required")
+    if not query:
+        raise ValueError("query is required")
+    client = get_tiktok_client()
+    options = await get_targeting_options(
+        client,
+        advertiser_id=advertiser_id,
+        query=query,
+        objective_type=objective_type,
+        targeting_type=targeting_type,
+    )
+    return json.dumps(
+        {"success": True, "query": query, "count": len(options), "options": options},
+        indent=2,
+    )
 
 
 def main():
