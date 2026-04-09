@@ -245,6 +245,9 @@ async def get_reports_tool(
 async def get_video_performance_tool(
     advertiser_id: str,
     data_level: str = "AUCTION_AD",
+    campaign_ids: Optional[List[str]] = None,
+    adgroup_ids: Optional[List[str]] = None,
+    ad_ids: Optional[List[str]] = None,
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
     dimensions: Optional[List[str]] = None,
@@ -253,14 +256,20 @@ async def get_video_performance_tool(
 ) -> str:
     """Get TikTok-specific video engagement metrics not available in the standard integrated report:
     2-second views, 6-second views, completion rate, average watch time, and video play actions.
+    At least one of campaign_ids, adgroup_ids, or ad_ids is required.
     data_level: AUCTION_AD | AUCTION_ADGROUP | AUCTION_CAMPAIGN. Dates are YYYY-MM-DD."""
     if not advertiser_id:
         raise ValueError("advertiser_id is required")
+    if not campaign_ids and not adgroup_ids and not ad_ids:
+        raise ValueError("At least one of campaign_ids, adgroup_ids, or ad_ids is required")
     client = get_tiktok_client()
     result = await get_video_performance(
         client,
         advertiser_id=advertiser_id,
         data_level=data_level,
+        campaign_ids=campaign_ids,
+        adgroup_ids=adgroup_ids,
+        ad_ids=ad_ids,
         start_date=start_date,
         end_date=end_date,
         dimensions=dimensions,
@@ -304,21 +313,24 @@ async def get_creative_fatigue_tool(
 @handle_errors
 async def get_ad_benchmark_tool(
     advertiser_id: str,
-    industry_id: Optional[str] = None,
-    placement_type: Optional[str] = None,
+    ad_ids: List[str],
+    dimensions: Optional[List[str]] = None,
     objective_type: Optional[str] = None,
 ) -> str:
-    """Get industry benchmark metrics (CTR, CVR, CPM, CPC) by vertical and placement.
-    Use to evaluate whether account performance is above or below industry average.
-    placement_type example: 'PLACEMENT_TIKTOK'. objective_type example: 'CONVERSIONS'."""
+    """Get benchmark metrics (CTR, CVR, CPM, CPC) for specific ads compared to industry averages.
+    ad_ids is required. dimensions defaults to ['PLACEMENT'].
+    Allowed dimension values: AD_CATEGORY, EXTERNAL_ACTION, LOCATION, PLACEMENT.
+    objective_type example: 'CONVERSIONS'."""
     if not advertiser_id:
         raise ValueError("advertiser_id is required")
+    if not ad_ids:
+        raise ValueError("ad_ids is required")
     client = get_tiktok_client()
     benchmarks = await get_ad_benchmark(
         client,
         advertiser_id=advertiser_id,
-        industry_id=industry_id,
-        placement_type=placement_type,
+        ad_ids=ad_ids,
+        dimensions=dimensions,
         objective_type=objective_type,
     )
     return json.dumps({"success": True, "benchmarks": benchmarks}, indent=2)
@@ -416,8 +428,8 @@ async def get_audience_reach_tool(
     interest_category_ids: Optional[List[str]] = None,
 ) -> str:
     """Get estimated audience reach for given targeting criteria.
-    Useful for planning campaigns and understanding audience size before launch.
-    objective_type examples: 'TRAFFIC', 'CONVERSIONS', 'APP_INSTALL'.
+    NOTE: This endpoint requires allowlist access from TikTok. Contact TikTok support if you
+    receive a 404 error. objective_type examples: 'TRAFFIC', 'CONVERSIONS', 'APP_INSTALL'.
     gender: 'GENDER_MALE' | 'GENDER_FEMALE' | 'GENDER_UNLIMITED'.
     Returns estimated_audience_size_lower, estimated_audience_size_upper, reach_trend."""
     if not advertiser_id:
@@ -442,27 +454,22 @@ async def get_audience_reach_tool(
 @handle_errors
 async def get_targeting_options_tool(
     advertiser_id: str,
-    query: str,
     objective_type: Optional[str] = None,
-    targeting_type: Optional[str] = None,
 ) -> str:
-    """Search available targeting options (interests, behaviors, demographics) by keyword.
-    Use to answer questions like 'what TikTok interest categories exist for fitness brands?'
-    targeting_type: 'INTEREST' | 'BEHAVIOR' | 'HASHTAG'. Returns id, name, type, audience_size."""
+    """Get all available interest categories for audience targeting.
+    Returns a list of interest categories with their IDs, names, levels, and sub-category IDs.
+    Use the returned interest_category_id values when setting up ad group targeting.
+    Optionally filter by objective_type (e.g. 'TRAFFIC', 'CONVERSIONS')."""
     if not advertiser_id:
         raise ValueError("advertiser_id is required")
-    if not query:
-        raise ValueError("query is required")
     client = get_tiktok_client()
     options = await get_targeting_options(
         client,
         advertiser_id=advertiser_id,
-        query=query,
         objective_type=objective_type,
-        targeting_type=targeting_type,
     )
     return json.dumps(
-        {"success": True, "query": query, "count": len(options), "options": options},
+        {"success": True, "count": len(options), "categories": options},
         indent=2,
     )
 

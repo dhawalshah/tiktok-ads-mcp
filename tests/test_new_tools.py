@@ -75,7 +75,13 @@ def test_get_video_performance_returns_rows_and_page_info():
     from tiktok_ads_mcp.tools.get_video_performance import get_video_performance
 
     result = asyncio.run(
-        get_video_performance(mock_client, advertiser_id="111", start_date="2024-01-01", end_date="2024-01-31")
+        get_video_performance(
+            mock_client,
+            advertiser_id="111",
+            campaign_ids=["C1"],
+            start_date="2024-01-01",
+            end_date="2024-01-31",
+        )
     )
 
     assert len(result["list"]) == 1
@@ -86,6 +92,7 @@ def test_get_video_performance_returns_rows_and_page_info():
     assert call_args[0][0] == "GET"
     assert call_args[0][1] == "/report/video_performance/get/"
     assert call_args[0][2]["advertiser_id"] == "111"
+    assert json.loads(call_args[0][2]["filtering"]) == {"campaign_ids": ["C1"]}
 
 
 def test_get_video_performance_dimensions_json_encoded():
@@ -98,12 +105,14 @@ def test_get_video_performance_dimensions_json_encoded():
         get_video_performance(
             mock_client,
             advertiser_id="111",
+            ad_ids=["AD1"],
             dimensions=["ad_id", "stat_time_day"],
         )
     )
 
     params = mock_client._make_request.call_args[0][2]
     assert params["dimensions"] == json.dumps(["ad_id", "stat_time_day"])
+    assert json.loads(params["filtering"]) == {"ad_ids": ["AD1"]}
 
 
 # ---------------------------------------------------------------------------
@@ -158,24 +167,20 @@ def test_get_ad_benchmark_returns_benchmark_dict():
     mock_client._make_request.return_value = {
         "code": 0,
         "data": {
-            "industry": "ECOMMERCE",
-            "placement": "PLACEMENT_TIKTOK",
-            "ctr": "1.5",
-            "cpm": "8.0",
-            "cpc": "0.53",
-            "cvr": "2.1",
+            "compare_date": "2024-01-31",
+            "items": [{"info": {"ad_id": "AD1"}, "metrics": {"ctr": "1.5"}}],
         },
     }
 
     from tiktok_ads_mcp.tools.get_ad_benchmark import get_ad_benchmark
 
-    result = asyncio.run(get_ad_benchmark(mock_client, advertiser_id="111"))
+    result = asyncio.run(get_ad_benchmark(mock_client, advertiser_id="111", ad_ids=["AD1"]))
 
-    assert result["ctr"] == "1.5"
-    assert result["industry"] == "ECOMMERCE"
+    assert "items" in result
+    assert result["items"][0]["info"]["ad_id"] == "AD1"
 
 
-def test_get_ad_benchmark_passes_optional_filters():
+def test_get_ad_benchmark_passes_required_params():
     mock_client = AsyncMock()
     mock_client._make_request.return_value = {"code": 0, "data": {}}
 
@@ -185,15 +190,15 @@ def test_get_ad_benchmark_passes_optional_filters():
         get_ad_benchmark(
             mock_client,
             advertiser_id="111",
-            industry_id="IND_001",
-            placement_type="PLACEMENT_TIKTOK",
+            ad_ids=["AD1", "AD2"],
+            dimensions=["PLACEMENT"],
             objective_type="CONVERSIONS",
         )
     )
 
     params = mock_client._make_request.call_args[0][2]
-    assert params["industry_id"] == "IND_001"
-    assert params["placement_type"] == "PLACEMENT_TIKTOK"
+    assert json.loads(params["dimensions"]) == ["PLACEMENT"]
+    assert json.loads(params["filtering"]) == {"ad_ids": ["AD1", "AD2"]}
     assert params["objective_type"] == "CONVERSIONS"
 
 
@@ -357,12 +362,12 @@ def test_get_targeting_options_returns_options_list():
     mock_client._make_request.return_value = {
         "code": 0,
         "data": {
-            "list": [
+            "interest_categories": [
                 {
-                    "id": "INT_001",
-                    "name": "Fitness & Wellness",
-                    "type": "INTEREST",
-                    "audience_size": 5000000,
+                    "interest_category_id": "10",
+                    "interest_category_name": "Education",
+                    "level": 1,
+                    "sub_category_ids": ["10100", "10101"],
                 }
             ]
         },
@@ -370,37 +375,30 @@ def test_get_targeting_options_returns_options_list():
 
     from tiktok_ads_mcp.tools.get_targeting_options import get_targeting_options
 
-    result = asyncio.run(
-        get_targeting_options(mock_client, advertiser_id="111", query="fitness")
-    )
+    result = asyncio.run(get_targeting_options(mock_client, advertiser_id="111"))
 
     assert len(result) == 1
-    assert result[0]["id"] == "INT_001"
-    assert result[0]["type"] == "INTEREST"
+    assert result[0]["id"] == "10"
+    assert result[0]["name"] == "Education"
+    assert result[0]["level"] == 1
+    assert result[0]["sub_category_ids"] == ["10100", "10101"]
     params = mock_client._make_request.call_args[0][2]
-    assert params["query"] == "fitness"
     assert params["advertiser_id"] == "111"
 
 
-def test_get_targeting_options_passes_optional_filters():
+def test_get_targeting_options_passes_objective_type():
     mock_client = AsyncMock()
-    mock_client._make_request.return_value = {"code": 0, "data": {"list": []}}
+    mock_client._make_request.return_value = {"code": 0, "data": {"interest_categories": []}}
 
     from tiktok_ads_mcp.tools.get_targeting_options import get_targeting_options
 
     asyncio.run(
-        get_targeting_options(
-            mock_client,
-            advertiser_id="111",
-            query="sports",
-            targeting_type="INTEREST",
-            objective_type="TRAFFIC",
-        )
+        get_targeting_options(mock_client, advertiser_id="111", objective_type="TRAFFIC")
     )
 
     params = mock_client._make_request.call_args[0][2]
-    assert params["targeting_type"] == "INTEREST"
     assert params["objective_type"] == "TRAFFIC"
+    assert "query" not in params
 
 
 # ---------------------------------------------------------------------------

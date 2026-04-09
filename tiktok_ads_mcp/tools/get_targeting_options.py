@@ -1,4 +1,4 @@
-"""Get Targeting Options Tool"""
+"""Get Targeting Options Tool — returns interest categories from TikTok."""
 
 import logging
 from typing import Any, Dict, List, Optional
@@ -9,28 +9,28 @@ logger = logging.getLogger(__name__)
 async def get_targeting_options(
     client,
     advertiser_id: str,
-    query: str,
     objective_type: Optional[str] = None,
-    targeting_type: Optional[str] = None,
 ) -> List[Dict[str, Any]]:
-    """Search available targeting options (interests, behaviors) by keyword."""
-    params: Dict[str, Any] = {"advertiser_id": advertiser_id, "query": query}
+    """Get available interest categories for targeting.
+
+    Returns a tree of interest categories (level 1 and sub-categories).
+    Use interest_category_id values when building audience targeting.
+    """
+    params: Dict[str, Any] = {"advertiser_id": advertiser_id}
     if objective_type is not None:
         params["objective_type"] = objective_type
-    if targeting_type is not None:
-        params["targeting_type"] = targeting_type
 
     try:
-        response = await client._make_request("GET", "/tool/targeting/search/", params)
-        items = response.get("data", {}).get("list", [])
+        response = await client._make_request("GET", "/tool/interest_category/", params)
+        categories = response.get("data", {}).get("interest_categories", [])
         return [
             {
-                "id": item.get("id"),
-                "name": item.get("name"),
-                "type": item.get("type"),
-                "audience_size": item.get("audience_size"),
+                "id": cat.get("interest_category_id"),
+                "name": cat.get("interest_category_name"),
+                "level": cat.get("level"),
+                "sub_category_ids": cat.get("sub_category_ids", []),
             }
-            for item in items
+            for cat in categories
         ]
     except Exception as e:
         logger.error(f"Failed to get targeting options: {e}")
