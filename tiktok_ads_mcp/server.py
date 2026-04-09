@@ -23,7 +23,8 @@ from .tools import (
     get_campaigns,
     get_ad_groups,
     get_ads,
-    get_reports
+    get_reports,
+    get_video_performance
 )
 
 # Setup logging
@@ -196,7 +197,7 @@ async def get_reports_tool(
     order_type: str = "DESC"
 ) -> str:
     """Get performance reports and analytics with comprehensive filtering and grouping options"""
-    
+
     client = get_tiktok_client()
     reports = await get_reports(
         client,
@@ -219,7 +220,7 @@ async def get_reports_tool(
         order_field=order_field,
         order_type=order_type
     )
-    
+
     return json.dumps({
         "success": True,
         "report_type": report_type,
@@ -229,6 +230,44 @@ async def get_reports_tool(
         "count": len(reports.get("list", [])),
         "reports": reports.get("list", [])
     }, indent=2)
+
+@app.tool()
+@handle_errors
+async def get_video_performance_tool(
+    advertiser_id: str,
+    data_level: str = "AUCTION_AD",
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    dimensions: Optional[List[str]] = None,
+    page: int = 1,
+    page_size: int = 10,
+) -> str:
+    """Get TikTok-specific video engagement metrics not available in the standard integrated report:
+    2-second views, 6-second views, completion rate, average watch time, and video play actions.
+    data_level: AUCTION_AD | AUCTION_ADGROUP | AUCTION_CAMPAIGN. Dates are YYYY-MM-DD."""
+    if not advertiser_id:
+        raise ValueError("advertiser_id is required")
+    client = get_tiktok_client()
+    result = await get_video_performance(
+        client,
+        advertiser_id=advertiser_id,
+        data_level=data_level,
+        start_date=start_date,
+        end_date=end_date,
+        dimensions=dimensions,
+        page=page,
+        page_size=page_size,
+    )
+    return json.dumps(
+        {
+            "success": True,
+            "advertiser_id": advertiser_id,
+            "page_info": result["page_info"],
+            "count": len(result["list"]),
+            "rows": result["list"],
+        },
+        indent=2,
+    )
 
 def main():
     """Main function to run the MCP server"""

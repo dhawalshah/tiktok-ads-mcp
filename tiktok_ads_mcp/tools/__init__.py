@@ -7,6 +7,7 @@ from .get_campaigns import get_campaigns
 from .get_ad_groups import get_ad_groups
 from .get_ads import get_ads
 from .reports import get_reports
+from .get_video_performance import get_video_performance
 
 __all__ = [
     "get_business_centers",
@@ -15,5 +16,6 @@ __all__ = [
     "get_campaigns",
     "get_ad_groups",
     "get_ads",
-    "get_reports"
+    "get_reports",
+    "get_video_performance"
 ] 
