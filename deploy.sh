@@ -18,7 +18,7 @@ SERVICE="tiktok-ads-mcp"
 IMAGE="${REGION}-docker.pkg.dev/${PROJECT}/${AR_REPO}/${SERVICE}:latest"
 
 echo "==> Building image: ${IMAGE}"
-docker build -t "${IMAGE}" .
+docker build --platform linux/amd64 -t "${IMAGE}" .
 
 echo "==> Configuring Docker for Artifact Registry"
 gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
