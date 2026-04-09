@@ -16,22 +16,26 @@ A comprehensive Model Context Protocol (MCP) server for interacting with the Tik
 
 ## Available Tools
 
-| Tool | Description | Status |
-|------|-------------|--------|
-| `get_authorized_ad_accounts_tool` | List all advertiser accounts under your access token | ✅ |
-| `get_advertiser_info_tool` | Account metadata: currency, timezone, industry, status | ✅ |
-| `get_business_centers_tool` | List accessible business centers | ✅ |
-| `get_campaigns_tool` | List standard campaigns with optional filters | ✅ |
-| `get_smart_plus_campaigns_tool` | List AI-optimised Smart+ campaigns (separate API) | ✅ |
-| `get_ad_groups_tool` | List ad groups under a campaign or advertiser | ✅ |
-| `get_ads_tool` | List individual ads with detailed creative data | ✅ |
-| `get_reports_tool` | Performance reports with custom dimensions, metrics, and date ranges | ✅ |
-| `get_video_performance_tool` | TikTok-specific video metrics: 2s/6s views, completion rate, watch time | ✅ |
-| `get_ad_benchmark_tool` | Compare ad CTR/CVR/CPM/CPC against industry benchmarks | ✅ |
-| `get_targeting_options_tool` | Browse interest categories available for audience targeting | ✅ |
-| `get_pixels_tool` | List TikTok Pixel installations and tracked conversion events | ✅ |
-| `get_creative_fatigue_tool` | Creative fatigue scores and refresh recommendations | ⚠️ Requires TikTok partner access |
-| `create/check/download_async_report_tool` | Async report pipeline for large datasets | ⚠️ Requires TikTok partner access |
+| Tool | Description |
+|------|-------------|
+| `get_authorized_ad_accounts_tool` | List all advertiser accounts accessible under your access token |
+| `get_advertiser_info_tool` | Account metadata: currency, timezone, industry, and status |
+| `get_business_centers_tool` | List business centers accessible under your access token |
+| `get_campaigns_tool` | List standard campaigns with optional filters |
+| `get_smart_plus_campaigns_tool` | List AI-optimised Smart+ campaigns — these do not appear in `get_campaigns_tool` |
+| `get_ad_groups_tool` | List ad groups under a campaign or advertiser |
+| `get_ads_tool` | List individual ads with detailed creative and status data |
+| `get_reports_tool` | Performance reports with custom dimensions, metrics, and date ranges |
+| `get_video_performance_tool` | TikTok-specific video metrics: 2s/6s views, completion rate, average watch time |
+| `get_ad_benchmark_tool` | Compare ad CTR, CVR, CPM, and CPC against industry benchmarks |
+| `get_targeting_options_tool` | Browse all interest categories available for audience targeting |
+| `get_pixels_tool` | List TikTok Pixel installations and tracked conversion events |
+| `get_creative_fatigue_tool` | Creative fatigue scores and refresh recommendations per ad ¹ |
+| `create_async_report_tool` | Create an async report task for large datasets or long date ranges ¹ |
+| `check_async_report_tool` | Check the status of an async report task ¹ |
+| `download_async_report_tool` | Download the completed data from an async report task ¹ |
+
+> ¹ Requires TikTok partner programme access.
 
 ## Prerequisites
 
