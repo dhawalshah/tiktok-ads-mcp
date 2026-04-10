@@ -673,3 +673,47 @@ def test_get_advertiser_balance_empty_response():
 
     result = asyncio.run(get_advertiser_balance(mock_client, bc_id="BC1"))
     assert result == []
+
+
+# ---------------------------------------------------------------------------
+# get_bc_assets
+# ---------------------------------------------------------------------------
+
+def test_get_bc_assets_returns_asset_list():
+    mock_client = AsyncMock()
+    mock_client._make_request.return_value = {
+        "code": 0,
+        "data": {
+            "list": [
+                {
+                    "asset_id": "A1",
+                    "asset_name": "Main Account",
+                    "asset_type": "ADVERTISER",
+                    "status": "ENABLE",
+                }
+            ]
+        },
+    }
+
+    from tiktok_ads_mcp.tools.get_bc_assets import get_bc_assets
+
+    result = asyncio.run(get_bc_assets(mock_client, bc_id="BC1", asset_type="ADVERTISER"))
+
+    assert len(result) == 1
+    assert result[0]["asset_id"] == "A1"
+    assert result[0]["asset_name"] == "Main Account"
+    assert result[0]["asset_type"] == "ADVERTISER"
+    assert result[0]["status"] == "ENABLE"
+    params = mock_client._make_request.call_args[0][2]
+    assert params["bc_id"] == "BC1"
+    assert params["asset_type"] == "ADVERTISER"
+
+
+def test_get_bc_assets_empty_response():
+    mock_client = AsyncMock()
+    mock_client._make_request.return_value = {"code": 0, "data": {"list": []}}
+
+    from tiktok_ads_mcp.tools.get_bc_assets import get_bc_assets
+
+    result = asyncio.run(get_bc_assets(mock_client, bc_id="BC1", asset_type="PIXEL"))
+    assert result == []
