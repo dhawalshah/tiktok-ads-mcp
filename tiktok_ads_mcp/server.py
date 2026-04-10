@@ -38,6 +38,7 @@ from .tools import (
     get_pixel_event_stats,
     get_video_assets,
     get_advertiser_balance,
+    get_bc_assets,
 )
 
 # Setup logging
@@ -608,6 +609,25 @@ async def get_advertiser_balance_tool(bc_id: str) -> str:
     items = await get_advertiser_balance(client, bc_id=bc_id)
     return json.dumps(
         {"success": True, "bc_id": bc_id, "count": len(items), "balances": items},
+        indent=2,
+    )
+
+
+@app.tool()
+@handle_errors
+async def get_bc_assets_tool(bc_id: str, asset_type: str) -> str:
+    """Get all assets of a given type within a Business Center.
+    asset_type must be one of: ADVERTISER, PIXEL, CATALOG.
+    Returns asset_id, asset_name, asset_type, status for each asset.
+    Use get_business_centers_tool first to get bc_id."""
+    if not bc_id:
+        raise ValueError("bc_id is required")
+    if not asset_type:
+        raise ValueError("asset_type is required — use ADVERTISER, PIXEL, or CATALOG")
+    client = get_tiktok_client()
+    items = await get_bc_assets(client, bc_id=bc_id, asset_type=asset_type)
+    return json.dumps(
+        {"success": True, "bc_id": bc_id, "asset_type": asset_type, "count": len(items), "assets": items},
         indent=2,
     )
 

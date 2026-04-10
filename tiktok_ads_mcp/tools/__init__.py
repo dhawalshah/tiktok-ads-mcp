@@ -18,6 +18,7 @@ from .get_smart_plus_campaigns import get_smart_plus_campaigns
 from .get_pixel_event_stats import get_pixel_event_stats
 from .get_video_assets import get_video_assets
 from .get_advertiser_balance import get_advertiser_balance
+from .get_bc_assets import get_bc_assets
 
 __all__ = [
     "get_business_centers",
@@ -40,4 +41,5 @@ __all__ = [
     "get_pixel_event_stats",
     "get_video_assets",
     "get_advertiser_balance",
+    "get_bc_assets",
 ]
