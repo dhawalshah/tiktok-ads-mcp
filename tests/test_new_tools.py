@@ -502,3 +502,66 @@ def test_get_smart_plus_campaigns_filters_by_ids():
     params = mock_client._make_request.call_args[0][2]
     assert params["campaign_ids"] == json.dumps(["SPC1", "SPC2"])
     assert params["status"] == "ENABLE"
+
+
+# ---------------------------------------------------------------------------
+# get_pixel_event_stats
+# ---------------------------------------------------------------------------
+
+def test_get_pixel_event_stats_returns_event_list():
+    mock_client = AsyncMock()
+    mock_client._make_request.return_value = {
+        "code": 0,
+        "data": {
+            "list": [
+                {
+                    "pixel_id": "PX1",
+                    "event_type": "Purchase",
+                    "date": "2024-01-01",
+                    "count": 42,
+                    "match_rate": 0.85,
+                }
+            ]
+        },
+    }
+
+    from tiktok_ads_mcp.tools.get_pixel_event_stats import get_pixel_event_stats
+
+    result = asyncio.run(
+        get_pixel_event_stats(
+            mock_client,
+            advertiser_id="111",
+            pixel_ids=["PX1"],
+            start_date="2024-01-01",
+            end_date="2024-01-31",
+        )
+    )
+
+    assert len(result) == 1
+    assert result[0]["pixel_id"] == "PX1"
+    assert result[0]["event_type"] == "Purchase"
+    assert result[0]["count"] == 42
+    assert result[0]["match_rate"] == 0.85
+    params = mock_client._make_request.call_args[0][2]
+    assert params["advertiser_id"] == "111"
+    assert params["pixel_ids"] == json.dumps(["PX1"])
+    assert params["start_date"] == "2024-01-01"
+    assert params["end_date"] == "2024-01-31"
+
+
+def test_get_pixel_event_stats_empty_response():
+    mock_client = AsyncMock()
+    mock_client._make_request.return_value = {"code": 0, "data": {"list": []}}
+
+    from tiktok_ads_mcp.tools.get_pixel_event_stats import get_pixel_event_stats
+
+    result = asyncio.run(
+        get_pixel_event_stats(
+            mock_client,
+            advertiser_id="111",
+            pixel_ids=["PX1"],
+            start_date="2024-01-01",
+            end_date="2024-01-31",
+        )
+    )
+    assert result == []

@@ -35,6 +35,7 @@ from .tools import (
     get_targeting_options,
     get_pixels,
     get_smart_plus_campaigns,
+    get_pixel_event_stats,
 )
 
 # Setup logging
@@ -531,6 +532,37 @@ async def get_smart_plus_campaigns_tool(
             "count": len(campaigns),
             "campaigns": campaigns,
         },
+        indent=2,
+    )
+
+
+@app.tool()
+@handle_errors
+async def get_pixel_event_stats_tool(
+    advertiser_id: str,
+    pixel_ids: List[str],
+    start_date: str,
+    end_date: str,
+) -> str:
+    """Get aggregated conversion event counts (Purchase, AddToCart, ViewContent, etc.)
+    per pixel over a date range. Use after get_pixels_tool to get pixel_ids.
+    Dates are YYYY-MM-DD. Returns one row per pixel per event type per day."""
+    if not advertiser_id:
+        raise ValueError("advertiser_id is required")
+    if not pixel_ids:
+        raise ValueError("pixel_ids is required")
+    if not start_date or not end_date:
+        raise ValueError("start_date and end_date are required")
+    client = get_tiktok_client()
+    items = await get_pixel_event_stats(
+        client,
+        advertiser_id=advertiser_id,
+        pixel_ids=pixel_ids,
+        start_date=start_date,
+        end_date=end_date,
+    )
+    return json.dumps(
+        {"success": True, "advertiser_id": advertiser_id, "count": len(items), "events": items},
         indent=2,
     )
 

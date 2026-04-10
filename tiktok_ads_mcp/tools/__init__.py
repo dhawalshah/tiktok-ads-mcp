@@ -15,6 +15,7 @@ from .get_audience_reach import get_audience_reach
 from .get_targeting_options import get_targeting_options
 from .get_pixels import get_pixels
 from .get_smart_plus_campaigns import get_smart_plus_campaigns
+from .get_pixel_event_stats import get_pixel_event_stats
 
 __all__ = [
     "get_business_centers",
@@ -34,4 +35,5 @@ __all__ = [
     "get_targeting_options",
     "get_pixels",
     "get_smart_plus_campaigns",
+    "get_pixel_event_stats",
 ]
