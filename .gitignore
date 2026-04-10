@@ -75,4 +75,7 @@ DEV_SETUP.md
 catch_auth.py
 get_token.py
 probe_apis.py
-smoke_test.pydocs/
+smoke_test.py
+
+# Browser automation
+.playwright-mcp/
