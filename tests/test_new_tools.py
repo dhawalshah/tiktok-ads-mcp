@@ -762,3 +762,48 @@ def test_get_bc_members_empty_response():
 
     result = asyncio.run(get_bc_members(mock_client, bc_id="BC1"))
     assert result == []
+
+
+# ---------------------------------------------------------------------------
+# get_offline_event_sets
+# ---------------------------------------------------------------------------
+
+def test_get_offline_event_sets_returns_set_list():
+    mock_client = AsyncMock()
+    mock_client._make_request.return_value = {
+        "code": 0,
+        "data": {
+            "list": [
+                {
+                    "event_set_id": "ES1",
+                    "name": "In-store Purchases",
+                    "status": "ENABLE",
+                    "event_types": ["Purchase", "Lead"],
+                    "create_time": "2024-01-01",
+                }
+            ]
+        },
+    }
+
+    from tiktok_ads_mcp.tools.get_offline_event_sets import get_offline_event_sets
+
+    result = asyncio.run(get_offline_event_sets(mock_client, advertiser_id="111"))
+
+    assert len(result) == 1
+    assert result[0]["event_set_id"] == "ES1"
+    assert result[0]["name"] == "In-store Purchases"
+    assert result[0]["status"] == "ENABLE"
+    assert result[0]["event_types"] == ["Purchase", "Lead"]
+    assert result[0]["create_time"] == "2024-01-01"
+    params = mock_client._make_request.call_args[0][2]
+    assert params["advertiser_id"] == "111"
+
+
+def test_get_offline_event_sets_empty_response():
+    mock_client = AsyncMock()
+    mock_client._make_request.return_value = {"code": 0, "data": {"list": []}}
+
+    from tiktok_ads_mcp.tools.get_offline_event_sets import get_offline_event_sets
+
+    result = asyncio.run(get_offline_event_sets(mock_client, advertiser_id="111"))
+    assert result == []
