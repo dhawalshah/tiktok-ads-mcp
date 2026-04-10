@@ -20,6 +20,7 @@ from .get_video_assets import get_video_assets
 from .get_advertiser_balance import get_advertiser_balance
 from .get_bc_assets import get_bc_assets
 from .get_bc_members import get_bc_members
+from .get_offline_event_sets import get_offline_event_sets
 
 __all__ = [
     "get_business_centers",
@@ -44,4 +45,5 @@ __all__ = [
     "get_advertiser_balance",
     "get_bc_assets",
     "get_bc_members",
+    "get_offline_event_sets",
 ]

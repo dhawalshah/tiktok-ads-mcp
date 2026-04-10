@@ -40,6 +40,7 @@ from .tools import (
     get_advertiser_balance,
     get_bc_assets,
     get_bc_members,
+    get_offline_event_sets,
 )
 
 # Setup logging
@@ -645,6 +646,23 @@ async def get_bc_members_tool(bc_id: str) -> str:
     items = await get_bc_members(client, bc_id=bc_id)
     return json.dumps(
         {"success": True, "bc_id": bc_id, "count": len(items), "members": items},
+        indent=2,
+    )
+
+
+@app.tool()
+@handle_errors
+async def get_offline_event_sets_tool(advertiser_id: str) -> str:
+    """List offline conversion event sets configured for an advertiser.
+    Shows what offline events (e.g. in-store purchases, phone leads) are being
+    matched back to TikTok ad exposure. Returns event_set_id, name, status,
+    event_types, and create_time."""
+    if not advertiser_id:
+        raise ValueError("advertiser_id is required")
+    client = get_tiktok_client()
+    items = await get_offline_event_sets(client, advertiser_id=advertiser_id)
+    return json.dumps(
+        {"success": True, "advertiser_id": advertiser_id, "count": len(items), "event_sets": items},
         indent=2,
     )
 
