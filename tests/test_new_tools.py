@@ -630,3 +630,46 @@ def test_get_video_assets_passes_filtering():
     assert params["filtering"] == json.dumps({"video_name": "Summer"})
     assert params["page"] == 2
     assert params["page_size"] == 10
+
+
+# ---------------------------------------------------------------------------
+# get_advertiser_balance
+# ---------------------------------------------------------------------------
+
+def test_get_advertiser_balance_returns_balance_list():
+    mock_client = AsyncMock()
+    mock_client._make_request.return_value = {
+        "code": 0,
+        "data": {
+            "list": [
+                {
+                    "advertiser_id": "111",
+                    "balance": "1500.00",
+                    "credit_limit": "5000.00",
+                    "currency": "USD",
+                }
+            ]
+        },
+    }
+
+    from tiktok_ads_mcp.tools.get_advertiser_balance import get_advertiser_balance
+
+    result = asyncio.run(get_advertiser_balance(mock_client, bc_id="BC1"))
+
+    assert len(result) == 1
+    assert result[0]["advertiser_id"] == "111"
+    assert result[0]["balance"] == "1500.00"
+    assert result[0]["credit_limit"] == "5000.00"
+    assert result[0]["currency"] == "USD"
+    params = mock_client._make_request.call_args[0][2]
+    assert params["bc_id"] == "BC1"
+
+
+def test_get_advertiser_balance_empty_response():
+    mock_client = AsyncMock()
+    mock_client._make_request.return_value = {"code": 0, "data": {"list": []}}
+
+    from tiktok_ads_mcp.tools.get_advertiser_balance import get_advertiser_balance
+
+    result = asyncio.run(get_advertiser_balance(mock_client, bc_id="BC1"))
+    assert result == []
