@@ -39,6 +39,7 @@ from .tools import (
     get_video_assets,
     get_advertiser_balance,
     get_bc_assets,
+    get_bc_members,
 )
 
 # Setup logging
@@ -628,6 +629,22 @@ async def get_bc_assets_tool(bc_id: str, asset_type: str) -> str:
     items = await get_bc_assets(client, bc_id=bc_id, asset_type=asset_type)
     return json.dumps(
         {"success": True, "bc_id": bc_id, "asset_type": asset_type, "count": len(items), "assets": items},
+        indent=2,
+    )
+
+
+@app.tool()
+@handle_errors
+async def get_bc_members_tool(bc_id: str) -> str:
+    """Get all members of a Business Center, their roles, and access status.
+    Returns user_id, username, email, role, status for each member.
+    Useful for access audits. Use get_business_centers_tool first to get bc_id."""
+    if not bc_id:
+        raise ValueError("bc_id is required")
+    client = get_tiktok_client()
+    items = await get_bc_members(client, bc_id=bc_id)
+    return json.dumps(
+        {"success": True, "bc_id": bc_id, "count": len(items), "members": items},
         indent=2,
     )
 
