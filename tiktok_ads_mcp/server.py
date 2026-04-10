@@ -36,6 +36,7 @@ from .tools import (
     get_pixels,
     get_smart_plus_campaigns,
     get_pixel_event_stats,
+    get_video_assets,
 )
 
 # Setup logging
@@ -563,6 +564,33 @@ async def get_pixel_event_stats_tool(
     )
     return json.dumps(
         {"success": True, "advertiser_id": advertiser_id, "count": len(items), "events": items},
+        indent=2,
+    )
+
+
+@app.tool()
+@handle_errors
+async def get_video_assets_tool(
+    advertiser_id: str,
+    filtering: Dict = None,
+    page: int = 1,
+    page_size: int = 20,
+) -> str:
+    """Browse the creative video asset library for an advertiser.
+    Returns video_id, video_name, duration, width, height, cover_url, create_time, size.
+    Optional filtering dict supports keys like 'video_name' for name search."""
+    if not advertiser_id:
+        raise ValueError("advertiser_id is required")
+    client = get_tiktok_client()
+    items = await get_video_assets(
+        client,
+        advertiser_id=advertiser_id,
+        filtering=filtering,
+        page=page,
+        page_size=page_size,
+    )
+    return json.dumps(
+        {"success": True, "advertiser_id": advertiser_id, "count": len(items), "videos": items},
         indent=2,
     )
 
