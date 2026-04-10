@@ -566,3 +566,67 @@ def test_get_pixel_event_stats_empty_response():
         )
     )
     assert result == []
+
+# ---------------------------------------------------------------------------
+# get_video_assets
+# ---------------------------------------------------------------------------
+
+def test_get_video_assets_returns_video_list():
+    mock_client = AsyncMock()
+    mock_client._make_request.return_value = {
+        "code": 0,
+        "data": {
+            "videos": [
+                {
+                    "video_id": "V1",
+                    "file_name": "Summer Ad",
+                    "duration": 15,
+                    "width": 1080,
+                    "height": 1920,
+                    "poster_url": "https://example.com/cover.jpg",
+                    "create_time": 1704067200,
+                    "size": 5242880,
+                }
+            ]
+        },
+    }
+
+    from tiktok_ads_mcp.tools.get_video_assets import get_video_assets
+
+    result = asyncio.run(get_video_assets(mock_client, advertiser_id="111"))
+
+    assert len(result) == 1
+    assert result[0]["video_id"] == "V1"
+    assert result[0]["video_name"] == "Summer Ad"
+    assert result[0]["duration"] == 15
+    assert result[0]["width"] == 1080
+    assert result[0]["height"] == 1920
+    assert result[0]["cover_url"] == "https://example.com/cover.jpg"
+    assert result[0]["create_time"] == 1704067200
+    assert result[0]["size"] == 5242880
+    params = mock_client._make_request.call_args[0][2]
+    assert params["advertiser_id"] == "111"
+    assert params["page"] == 1
+    assert params["page_size"] == 20
+
+
+def test_get_video_assets_passes_filtering():
+    mock_client = AsyncMock()
+    mock_client._make_request.return_value = {"code": 0, "data": {"videos": []}}
+
+    from tiktok_ads_mcp.tools.get_video_assets import get_video_assets
+
+    asyncio.run(
+        get_video_assets(
+            mock_client,
+            advertiser_id="111",
+            filtering={"video_name": "Summer"},
+            page=2,
+            page_size=10,
+        )
+    )
+
+    params = mock_client._make_request.call_args[0][2]
+    assert params["filtering"] == json.dumps({"video_name": "Summer"})
+    assert params["page"] == 2
+    assert params["page_size"] == 10
