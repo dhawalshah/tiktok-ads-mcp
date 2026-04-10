@@ -717,3 +717,48 @@ def test_get_bc_assets_empty_response():
 
     result = asyncio.run(get_bc_assets(mock_client, bc_id="BC1", asset_type="PIXEL"))
     assert result == []
+
+
+# ---------------------------------------------------------------------------
+# get_bc_members
+# ---------------------------------------------------------------------------
+
+def test_get_bc_members_returns_member_list():
+    mock_client = AsyncMock()
+    mock_client._make_request.return_value = {
+        "code": 0,
+        "data": {
+            "list": [
+                {
+                    "user_id": "U1",
+                    "username": "jane_doe",
+                    "email": "jane@example.com",
+                    "role": "ADMIN",
+                    "status": "ACTIVE",
+                }
+            ]
+        },
+    }
+
+    from tiktok_ads_mcp.tools.get_bc_members import get_bc_members
+
+    result = asyncio.run(get_bc_members(mock_client, bc_id="BC1"))
+
+    assert len(result) == 1
+    assert result[0]["user_id"] == "U1"
+    assert result[0]["username"] == "jane_doe"
+    assert result[0]["email"] == "jane@example.com"
+    assert result[0]["role"] == "ADMIN"
+    assert result[0]["status"] == "ACTIVE"
+    params = mock_client._make_request.call_args[0][2]
+    assert params["bc_id"] == "BC1"
+
+
+def test_get_bc_members_empty_response():
+    mock_client = AsyncMock()
+    mock_client._make_request.return_value = {"code": 0, "data": {"list": []}}
+
+    from tiktok_ads_mcp.tools.get_bc_members import get_bc_members
+
+    result = asyncio.run(get_bc_members(mock_client, bc_id="BC1"))
+    assert result == []
