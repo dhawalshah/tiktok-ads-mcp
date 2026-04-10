@@ -19,10 +19,10 @@ async def get_bc_members(
         return [
             {
                 "user_id": item.get("user_id"),
-                "username": item.get("username"),
-                "email": item.get("email"),
-                "role": item.get("role"),
-                "status": item.get("status"),
+                "username": item.get("user_name"),
+                "email": item.get("user_email"),
+                "role": item.get("user_role"),
+                "status": item.get("relation_status"),
             }
             for item in items
         ]
