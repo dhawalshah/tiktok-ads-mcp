@@ -641,12 +641,14 @@ def test_get_advertiser_balance_returns_balance_list():
     mock_client._make_request.return_value = {
         "code": 0,
         "data": {
-            "list": [
+            "advertiser_account_list": [
                 {
                     "advertiser_id": "111",
-                    "balance": "1500.00",
-                    "credit_limit": "5000.00",
+                    "advertiser_name": "Test Co",
+                    "account_balance": 1500.0,
+                    "cash_balance": 1200.0,
                     "currency": "USD",
+                    "timezone": "America/New_York",
                 }
             ]
         },
@@ -658,9 +660,11 @@ def test_get_advertiser_balance_returns_balance_list():
 
     assert len(result) == 1
     assert result[0]["advertiser_id"] == "111"
-    assert result[0]["balance"] == "1500.00"
-    assert result[0]["credit_limit"] == "5000.00"
+    assert result[0]["advertiser_name"] == "Test Co"
+    assert result[0]["balance"] == 1500.0
+    assert result[0]["cash_balance"] == 1200.0
     assert result[0]["currency"] == "USD"
+    assert result[0]["timezone"] == "America/New_York"
     params = mock_client._make_request.call_args[0][2]
     assert params["bc_id"] == "BC1"
 
@@ -731,10 +735,10 @@ def test_get_bc_members_returns_member_list():
             "list": [
                 {
                     "user_id": "U1",
-                    "username": "jane_doe",
-                    "email": "jane@example.com",
-                    "role": "ADMIN",
-                    "status": "ACTIVE",
+                    "user_name": "jane_doe",
+                    "user_email": "jane@example.com",
+                    "user_role": "ADMIN",
+                    "relation_status": "BOUND",
                 }
             ]
         },
@@ -749,7 +753,7 @@ def test_get_bc_members_returns_member_list():
     assert result[0]["username"] == "jane_doe"
     assert result[0]["email"] == "jane@example.com"
     assert result[0]["role"] == "ADMIN"
-    assert result[0]["status"] == "ACTIVE"
+    assert result[0]["status"] == "BOUND"
     params = mock_client._make_request.call_args[0][2]
     assert params["bc_id"] == "BC1"
 

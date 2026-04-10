@@ -10,18 +10,20 @@ async def get_advertiser_balance(
     client,
     bc_id: str,
 ) -> List[Dict[str, Any]]:
-    """Get cash balance and credit limit for all advertisers in a Business Center."""
+    """Get balance details for all advertisers in a Business Center."""
     params: Dict[str, Any] = {"bc_id": bc_id}
 
     try:
         response = await client._make_request("GET", "/advertiser/balance/get/", params)
-        items = response.get("data", {}).get("list", [])
+        items = response.get("data", {}).get("advertiser_account_list", [])
         return [
             {
                 "advertiser_id": item.get("advertiser_id"),
-                "balance": item.get("balance"),
-                "credit_limit": item.get("credit_limit"),
+                "advertiser_name": item.get("advertiser_name"),
+                "balance": item.get("account_balance"),
+                "cash_balance": item.get("cash_balance"),
                 "currency": item.get("currency"),
+                "timezone": item.get("timezone"),
             }
             for item in items
         ]
