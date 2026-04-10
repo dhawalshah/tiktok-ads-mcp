@@ -37,6 +37,7 @@ from .tools import (
     get_smart_plus_campaigns,
     get_pixel_event_stats,
     get_video_assets,
+    get_advertiser_balance,
 )
 
 # Setup logging
@@ -591,6 +592,22 @@ async def get_video_assets_tool(
     )
     return json.dumps(
         {"success": True, "advertiser_id": advertiser_id, "count": len(items), "videos": items},
+        indent=2,
+    )
+
+
+@app.tool()
+@handle_errors
+async def get_advertiser_balance_tool(bc_id: str) -> str:
+    """Get cash balance and credit limit for all advertiser accounts within a Business Center.
+    Returns advertiser_id, balance, credit_limit, and currency for each account.
+    Use get_business_centers_tool first to get bc_id."""
+    if not bc_id:
+        raise ValueError("bc_id is required")
+    client = get_tiktok_client()
+    items = await get_advertiser_balance(client, bc_id=bc_id)
+    return json.dumps(
+        {"success": True, "bc_id": bc_id, "count": len(items), "balances": items},
         indent=2,
     )
 
