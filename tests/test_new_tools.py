@@ -542,6 +542,7 @@ def test_get_pixel_event_stats_returns_event_list():
     assert result[0]["event_type"] == "Purchase"
     assert result[0]["count"] == 42
     assert result[0]["match_rate"] == 0.85
+    assert result[0]["date"] == "2024-01-01"
     params = mock_client._make_request.call_args[0][2]
     assert params["advertiser_id"] == "111"
     assert params["pixel_ids"] == json.dumps(["PX1"])
