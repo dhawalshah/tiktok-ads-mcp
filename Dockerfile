@@ -10,6 +10,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application source
 COPY tiktok_ads_mcp/ ./tiktok_ads_mcp/
+COPY oauth/ ./oauth/
 COPY server_http.py .
 
 # Cloud Run injects PORT automatically; default 8080 for local testing

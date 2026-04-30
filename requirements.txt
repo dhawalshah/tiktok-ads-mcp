@@ -13,3 +13,6 @@ pandas>=2.2.0
 # HTTP server for Cloud Run deployment
 uvicorn>=0.30.0
 starlette>=0.40.0
+
+# Firestore for OAuth 2.1 authorization-server state and per-user credentials
+google-cloud-firestore>=2.16.0

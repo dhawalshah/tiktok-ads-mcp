@@ -24,15 +24,24 @@ class TikTokAdsClient:
                 f"Missing required credentials: {', '.join(missing)}. "
                 f"Please check your configuration and ensure all required fields are set."
             )
-        
+
         self.app_id = config.APP_ID
         self.secret = config.SECRET
-        self.access_token = config.ACCESS_TOKEN
         self.base_url = config.BASE_URL
         self.api_version = config.API_VERSION
         self.request_timeout = config.REQUEST_TIMEOUT
-        
+
         logger.info("TikTok API client initialized")
+
+    @property
+    def access_token(self) -> str:
+        """Resolve the access token at call time.
+
+        In HTTP server mode this returns the per-request token set by the
+        bearer middleware (different per user). In STDIO mode it returns
+        the static TIKTOK_ACCESS_TOKEN env var.
+        """
+        return config.get_access_token()
     
     @retry(
         stop=stop_after_attempt(3),

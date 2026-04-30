@@ -1,0 +1,23 @@
+# Cloud Run build ignore
+.gcloudignore
+.git
+.gitignore
+.env
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+*.egg-info/
+dist/
+build/
+.DS_Store
+docs/
+tests/
+examples/
+smoke_test.py
+get_token.py
+catch_auth.py
+probe_apis.py
