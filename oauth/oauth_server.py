@@ -275,7 +275,13 @@ async def oauth_callback(request: Request) -> "RedirectResponse | HTMLResponse":
     # TikTok's response has used different field names across docs/versions —
     # check several candidates and fall back to a 24h default for access token,
     # 1 year default for refresh token (matching their typical lifetimes).
-    DEFAULT_ACCESS_TTL = 24 * 3600
+    # TikTok Business API access tokens are documented as 24h but in practice
+    # are long-lived (months+) unless the user revokes or app credentials
+    # rotate. We default to 1 year here so the cached token is reused; if it
+    # genuinely expires, the API call surfaces 401 and the user re-authenticates.
+    # Refresh tokens are only issued when the app has the "Refresh Token"
+    # feature enabled in the TikTok Developer Portal — most apps don't.
+    DEFAULT_ACCESS_TTL = 365 * 24 * 3600
     DEFAULT_REFRESH_TTL = 365 * 24 * 3600
     access_ttl = int(
         data.get("access_token_expire_in")
