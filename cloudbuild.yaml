@@ -10,7 +10,7 @@
 
 substitutions:
   _REGION: asia-southeast1
-  _PROJECT: "YOUR_PROJECT_NUMBER"
+  _PROJECT: your-gcp-project-id
   _AR_REPO: mcp-servers
   _SERVICE: tiktok-ads-mcp
 
